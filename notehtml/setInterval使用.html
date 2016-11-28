@@ -1,0 +1,308 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+		<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+		<title>底部导航</title>
+		<link rel="stylesheet" type="text/css" href="../css/public.css" />
+		<style type="text/css">
+			.info {
+				position: relative;
+			}
+			
+			.info> div:nth-child(1) {
+				position: relative;
+				height: 130px;
+				text-align: center;
+				overflow: hidden;
+				-webkit-tap-highlight-color: transparent;
+			}
+			
+			.info> div:nth-child(1)>div:nth-child(1) {
+				position: absolute;
+				height: 75px;
+				width: 75px;
+				left: 0;
+				right: 0;
+				top: 7px;
+				margin: auto;
+			}
+			
+			.info> div:nth-child(1)>div:nth-child(2) {
+				position: absolute;
+				left: 0;
+				right: 0;
+				color: #333333;
+				top: 97px;
+			}
+			
+			.info> div:nth-child(1)>div:nth-child(1) img {
+				width: 75px;
+				height: 75px;
+				border-radius: 50%;
+			}
+			
+			.info> div:nth-child(1)>div:nth-child(1) {
+				border: 3px solid #E0E0E0;
+				border-radius: 50%;
+			}
+			
+			.info> div:nth-child(2) {
+				position: relative;
+				height: 40px;
+				line-height: 40px;
+				text-align: center;
+			}
+			
+			.info> div:nth-child(2)> div {
+				position: relative;
+				width: 50%;
+				float: left;
+				background-color: #dddddd;
+				color: #666666;
+				font-size: 18px;
+				/*border: 0.5px solid;
+				 box-sizing: border-box;
+				 -moz-box-sizing: border-box;
+				 -webkit-box-sizing: border-box;*/
+			}
+			
+			.info> div:nth-child(2)> div.active {
+				background-color: #FF7901;
+				color: #FFFFFF;
+				/*border: 0.5px solid #0000FF;*/
+			}
+			
+			.flex-con {
+				position: relative;
+			}
+		</style>
+	</head>
+
+	<body>
+		<header class="cry_header_box" id="header">
+			<div class="cry_header_inner">
+				<div></div>
+				<div class="cry_header_title">
+						VIP司机端
+				</div>
+				<div class="cry_header_ex">
+					<div id="titlePhoto_div" style="display: none;border: 2px solid #E0E0E0;border-radius: 50%;height: 30px;width: 30px;position: relative; overflow: hidden;bottom: 5px;"><img onclick="OpenNewWind()"  src="../icon/logo.png" style="height: 100%;width: 100%;border-radius:50% ;" id="titlePhoto" /></div>
+				</div>
+			</div>
+		</header>
+		<div class="info" style="">
+			<div onclick="OpenNewWind()" id="logo">
+
+				<div><img src="../icon/logo.png" id="headPhoto" /></div>
+				<div class="color_66 font_18" id="nickname">
+					车如云A
+				</div>
+			</div>
+			<div id="SwitchBar">
+				<div class="active" onclick="randomSwitchBtn( this );">
+					<span>未完成</span>
+				</div>
+				<div onclick="randomSwitchBtn( this );">
+					<span>已完成</span>
+				</div>
+			</div>
+		</div>
+		<div class="flex-con"></div>
+	</body>
+
+</html>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript">
+	var doc = document,timer;
+	/**
+	 * 页面初始化完成后执行
+	 * @author 彭火艳
+	 */
+	$App.ready(function() {
+		$App.keyback();
+		document.querySelector('.info').style.top = $App.headerPos.h + 'px';
+		loadHeadPhoto();
+		loadUserInfo();
+		funIniGroup();
+		//添加事件监听
+		addEventListener();
+	});
+
+	/**
+	 * 添加事件监听
+	 * @author 彭火艳
+	 */
+	function addEventListener() {
+		//头像更新
+		api.addEventListener({
+			name: 'loadHeadPhoto'
+		}, function(ret, err) {
+			loadHeadPhoto();
+		});
+		$App.AddEvent('reportGPS',function(){
+			window.timer = setInterval(function() {
+				reportGPS();
+			}, 5000);
+		});
+		$App.AddEvent('closeReportGPS',function(){
+			window.clearInterval(timer);
+		});
+	}
+	
+	/**
+	 * 加载用户信息
+	 * @author 彭火艳
+	 */
+	function loadUserInfo() {
+		$App.AjaxByToken({
+			type: 'get',
+			url: '/member/currentMemberInfo',
+			flag: true,
+			data: {},
+			success: function(res) {
+				if(res.status == 'success') {
+					//获取用户信息成功后，回填信息并显示信息模块
+					document.getElementById("nickname").textContent = res.data.realName;
+					document.querySelector('.info').style.display = '';
+				} else {
+					$App.toast(res.msg);
+				}
+			}
+		});
+	}
+
+	/**
+	 * 初始化头像
+	 * @author 彭火艳
+	 */
+	function loadHeadPhoto() {
+		//console.log('headphoto..........');
+		var headPhoto = $App.getheadPhoto();
+		if(headPhoto && headPhoto.localurl && headPhoto.localurl != '') { //本地有缓存头像，加载本地图片
+			doc.getElementById("headPhoto").src = headPhoto.localurl;
+			doc.getElementById("titlePhoto").src = headPhoto.localurl;
+		} else if(headPhoto && headPhoto.serverurl && headPhoto.serverurl != '') { //本地无缓存头像，加载服务器图片
+			doc.getElementById("headPhoto").src = headPhoto.serverurl;
+			doc.getElementById("titlePhoto").src = headPhoto.serverurl;
+		} else { //无头像信息，使用默认图片
+			doc.getElementById("headPhoto").src = '../icon/logo.png';
+			doc.getElementById("titlePhoto").src = '../icon/logo.png';
+		}
+	}
+	/**
+	 * 初始化frame组
+	 * @author 彭火艳
+	 */
+	function funIniGroup() {
+		frames = [];
+		frames.push({
+			name: 'html/frame_order_notcomplete',
+			url: 'widget://html/frame_order_notcomplete.html',
+			bgColor: '#ffffff',
+			bounces: true
+		});
+		frames.push({
+			name: 'html/frame_order_complete',
+			url: 'widget://html/frame_order_complete.html',
+			bgColor: '#ffffff',
+			bounces: true
+		});
+
+		api.openFrameGroup({
+			name: 'group',
+			scrollEnabled: false,
+			rect: {
+				x: 0,
+				y: $api.dom('#header').offsetHeight + $api.dom('.info').offsetHeight,
+				w: api.winWidth,
+				h: api.winHeight - ($api.dom('#header').offsetHeight + $api.dom('.info').offsetHeight)
+			},
+			index: 0,
+			frames: frames
+		}, function(ret, err) {
+			//console.log("openFrameGroup:" + ret);
+			//console.log("openFrameGroup:" + err);
+		});
+	}
+
+	function setFrameGroupAttr() {
+		api.setFrameGroupAttr({
+			name: 'group',
+			rect: {
+				x: 0,
+				y: $api.dom('#header').offsetHeight + $api.dom('.info').offsetHeight,
+				w: api.winWidth,
+				h: api.winHeight - ($api.dom('#header').offsetHeight + $api.dom('.info').offsetHeight)
+			},
+		});
+	}
+	/**
+	 * 点击按钮切换frame
+	 * @param{Element} tag 标签
+	 * @author 彭火艳
+	 */
+	function randomSwitchBtn(tag) {
+		//重复点击当前按钮时，不做处理
+		if(tag == $api.dom('#SwitchBar div.active'))
+			return;
+		//获取可点击的全部按钮
+		var bars = $api.domAll('#SwitchBar div'),
+			index = 0;
+		for(var i = 0, len = bars.length; i < len; i++) {
+			if(tag == bars[i]) {
+				index = i;
+			} else {
+				$api.removeCls(bars[i], 'active');
+			}
+		}
+		$api.addCls(bars[index], 'active');
+		api.setFrameGroupIndex({
+			name: 'group',
+			index: index,
+			scroll: true
+		});
+	}
+
+	/**
+	 * 打开个人中心窗口
+	 * @author 彭火艳
+	 */
+	function OpenNewWind() {
+		api.openWin({
+			name: 'html/usercenter/cry_driver_usercenter',
+			url: 'widget://html/usercenter/cry_driver_usercenter.html',
+			delay: 200,
+			reload: true,
+		});
+	}
+	
+	function reportGPS() {
+		var options={};
+        var bMap = api.require('bMap');
+        bMap.getLocation({
+            accuracy: '10m',
+            autoStop: true
+        }, function(rs, err) {
+            if (rs.status) {
+                if(!rs.lat || !rs.lon) return
+                options['driverId'] = $App.getUser().id || '';
+                options['lag'] = rs.lat;
+                options['lon'] = rs.lon;
+                options['cityName'] = 'NULL';
+                $App.ajax({
+                    url:$App.config.CRY_API_GPS_URL + '/gps/driver/report.do',
+                    data:options,
+                    success:function (res) {
+                    },
+                    error:function (err) {
+                    }
+                })
+            }
+        });
+
+    }
+</script>
