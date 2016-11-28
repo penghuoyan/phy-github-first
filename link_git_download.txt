@@ -1,0 +1,7 @@
+https://github.com/git-for-windows/git/releases/latest
+
+msysgit是Windows版的Git，从https://git-for-windows.github.io/下载，然后按默认选项安装即可。
+
+下载链接：https://github.com/git-for-windows/git/releases/latest
+然后各种下一步，建议使用默认选项。
+安装完成后，在开始菜单里找到“Git”->“Git Bash”，可以打开命令窗口，就说明Git安装成功！
