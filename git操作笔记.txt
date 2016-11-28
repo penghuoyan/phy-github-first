@@ -1,3 +1,34 @@
+Windows下Git客户端和Github设置
+第一步：安装Git For Windows
+     msysgit是Windows版的Git，从https://git-for-windows.github.io/下载，然后按默认选项安装即可。
+     下载链接：https://github.com/git-for-windows/git/releases/latest
+      然后各种下一步，建议使用默认选项。
+      安装完成后，在开始菜单里找到“Git”->“Git Bash”，可以打开命令窗口，就说明Git安装成功！
+
+第二步：设置Git客户端
+    
+1.首先启动一个Git Bash窗口（非Windows用户直接打开终端）。设置用户名和邮箱，告诉别人你是谁！
+	git config --global user.name "Your Name"
+	git config --global user.email "email@example.com"
+2.生产密钥对：注意还是在Git Bash里面操作。
+
+	2.1.执行：
+	cd ~/.ssh
+	如果返回“… No such file or directory”，说明没有生成过SSH Key，直接进入第3步生产新的Key。否则进入第2步备份!
+	2.2.如果之前已经生成过了，需要进行备份：
+	mkdir key_backup mv id_isa* key_backup
+	2.3.生成新的Key：（引号内的内容替换为你自己的邮箱）
+    	ssh-keygen -t rsa -C "your_email@youremail.com"
+        直接回车，不要修改默认路劲。
+    	Enter passphrase (empty for no passphrase): Enter same passphrase again:
+        设置一个密码短语，在每次远程操作之前会要求输入密码短语！闲麻烦可以直接回车，不设置。
+
+第三步：在GitHub上提交公钥：
+	找到.ssh文件夹，用文本编辑器打开“id_rsa.pub”文件，复制内容到剪贴板
+	打开 https://github.com/settings/ssh ，点击 Add SSH Key 按钮，粘贴进去保存即可。
+
+
+###############################################################################
 1.git remote add origin git@github.com:penghuoyan/phy-github-first
 
 打开github仓库：penghuoyan/phy-github-first(项目名、仓库名)
